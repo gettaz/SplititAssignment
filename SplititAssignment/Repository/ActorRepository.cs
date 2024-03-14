@@ -61,19 +61,20 @@ namespace SplititAssignment.Repository
             return query.ToList();
         }
 
-        public bool NameExists(string name, string provider)
+        public string GetNameId(string name, string provider)
         {
-            return _dataContext.Actors.Any(actor => actor.Source == provider && actor.Name == name);
+            return _dataContext.Actors.Where(actor => actor.Source == provider && actor.Name == name)?.Select(ac => ac.Id).FirstOrDefault();
         }
 
         public string GetRankId(int rank, string provider)
         {
-            return _dataContext.Actors.Where(actor => actor.Source == provider && actor.Rank == rank).Select(ac => ac.Id).First();
+            return _dataContext.Actors.Where(actor => actor.Source == provider && actor.Rank == rank)?.Select(ac => ac.Id).FirstOrDefault();
         }
 
         public void Update(Actor actor)
         {
-            _dataContext.Update(actor);
+            var curr = GetActor(actor.Id);
+            _dataContext.Entry(curr).CurrentValues.SetValues(actor);
             Save();
         }
 

@@ -2,6 +2,7 @@
 using SplititAssignment.Exceptions;
 using SplititAssignment.Interfaces;
 using SplititAssignment.Models;
+using SplititAssignment.Repository;
 
 namespace SplititAssignment.Services
 {
@@ -25,13 +26,15 @@ namespace SplititAssignment.Services
                 throw new DuplicateEntityException("Rank", request.Rank.ToString(), request.Source);
             }
 
-            if (_actorRepository.NameExists(request.Name, request.Source))
+            var currNameId = _actorRepository.GetNameId(request.Name, request.Source);
+
+            if (!string.IsNullOrEmpty(currNameId))
             {
                 throw new DuplicateEntityException("Name", request.Name, request.Source);
             }
 
             var actor = _mapper.Map<Actor>(request);
-
+            _actorRepository.AddActor(actor);
             var response = _mapper.Map<ActorResponse>(actor);
             return response;
         }
@@ -81,6 +84,13 @@ namespace SplititAssignment.Services
             if (!string.IsNullOrEmpty(currentRankId) && currentRankId != actorId)
             {
                 throw new DuplicateEntityException("Rank" ,request.Rank.ToString(), request.Source);
+            }
+
+            var currNameId = _actorRepository.GetNameId(request.Name, request.Source);
+
+            if (!string.IsNullOrEmpty(currNameId) && currNameId != actorId)
+            {
+                throw new DuplicateEntityException("Name", request.Name, request.Source);
             }
 
             var actor = _mapper.Map<Actor>(request);

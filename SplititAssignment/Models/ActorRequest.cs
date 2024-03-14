@@ -12,14 +12,14 @@ namespace SplititAssignment.Models
         /// Name of the actor. Only letters are allowed.
         /// </summary>
         [Required(ErrorMessage = "Name is required")]
-        [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Only letters allowed in name")]
+        [RegularExpression(@"^[a-zA-Z \-]+$", ErrorMessage = "Only letters allowed in name")]
         [DefaultValue("John Doe")]
         public string Name { get; set; }
 
         [DefaultValue("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")]
         public string Details { get; set; }
 
-        [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Only letters allowed in type")]
+        [RegularExpression(@"^[a-zA-Z \-]+$", ErrorMessage = "Only letters allowed in type")]
         public string Type { get; set; } = "Actor";
 
         /// <summary>
