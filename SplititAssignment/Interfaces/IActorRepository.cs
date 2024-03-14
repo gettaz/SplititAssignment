@@ -5,11 +5,12 @@ namespace SplititAssignment.Interfaces
     public interface IActorRepository
     {
         IEnumerable<Actor> GetActors(string provider, int? rankStart = null, int? rankEnd = null, int skip = 0, int take = 10);
-        bool AddActors (IEnumerable<Actor> actors);
-        bool RankExists (int rank, string provider);
-        bool AddActor (Actor actor);
-        bool DeleteActor (Actor actor);
+        void AddActors (IEnumerable<Actor> actors);
+        string GetRankId (int rank, string provider);
+        bool NameExists(string name, string provider);
+        void AddActor (Actor actor);
+        void DeleteActor (Actor actor);
         Actor GetActor (string actorId);
-        bool Update(Actor actor);
+        void Update(Actor actor);
     }
 }

@@ -14,22 +14,22 @@ namespace SplititAssignment.Repository
             _dataContext = context;
         }
 
-        public bool AddActor(Actor actor)
+        public void AddActor(Actor actor)
         {
             _dataContext.Actors.Add(actor);
-            return Save();
+            Save();
         }
 
-        public bool AddActors(IEnumerable<Actor> actors)
+        public void AddActors(IEnumerable<Actor> actors)
         {
             _dataContext.Actors.AddRange(actors);
-            return Save();
+            Save();
         }
 
-        public bool DeleteActor(Actor actor)
+        public void DeleteActor(Actor actor)
         {
             _dataContext.Remove(actor);
-            return Save();
+            Save();
         }
 
         public Actor GetActor(string actorId)
@@ -61,21 +61,25 @@ namespace SplititAssignment.Repository
             return query.ToList();
         }
 
-        public bool RankExists(int rank, string provider)
+        public bool NameExists(string name, string provider)
         {
-            return _dataContext.Actors.Any(actor => actor.Source == provider && actor.Rank == rank);
+            return _dataContext.Actors.Any(actor => actor.Source == provider && actor.Name == name);
         }
 
-        public bool Update(Actor actor)
+        public string GetRankId(int rank, string provider)
+        {
+            return _dataContext.Actors.Where(actor => actor.Source == provider && actor.Rank == rank).Select(ac => ac.Id).First();
+        }
+
+        public void Update(Actor actor)
         {
             _dataContext.Update(actor);
-            return Save();
+            Save();
         }
 
-        private bool Save()
+        private void Save()
         {
-            var saved = _dataContext.SaveChanges();
-            return saved > 0 ? true : false;
+            _dataContext.SaveChanges();
         }
     }
 }

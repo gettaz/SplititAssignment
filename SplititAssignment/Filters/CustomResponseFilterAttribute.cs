@@ -2,11 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using SplititAssignment.Exceptions;
+using SplititAssignment.Models;
 
 public class CustomResponseFilterAttribute : IActionFilter
 {
     public void OnActionExecuting(ActionExecutingContext context)
     {
+
     }
 
     public void OnActionExecuted(ActionExecutedContext context)
@@ -36,23 +38,23 @@ public class CustomResponseFilterAttribute : IActionFilter
             var status = context.Exception switch
             {
                 ValidationException => StatusCodes.Status400BadRequest,
-                DuplicateRankException => StatusCodes.Status409Conflict,
+                DuplicateEntityException => StatusCodes.Status409Conflict,
                 _ => StatusCodes.Status500InternalServerError
+            };
+            var errors = new List<Error>
+            {
+                new Error
+                {
+                    Code = (context.Exception as CustomException)?.Code ?? "Error",
+                    Message = context.Exception.Message,
+                    AdditionalInfo = (context.Exception as CustomException)?.AdditionalInfo
+                    }
             };
 
             var errorResponse = new
             {
-                Errors = new List<object>
-                {
-                    new
-                    {
-                        (context.Exception as CustomException)?.Code,
-                        context.Exception.Message,
-                        (context.Exception as CustomException)?.AdditionalInfo
-                    }
-                },
-                StatusCode = status
-            ,
+                Errors = errors,
+                StatusCode = status,
                 TraceId = context.HttpContext.TraceIdentifier,
                 IsSuccess = false
             };

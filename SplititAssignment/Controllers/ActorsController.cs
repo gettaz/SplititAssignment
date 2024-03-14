@@ -15,7 +15,7 @@ public class ActorsController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ActorSummary>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ActorsSummaryResponse))]
     public IActionResult GetAllActors([FromQuery] int? rankStart, [FromQuery] int? rankEnd, [FromQuery] string provider = "IMDb", [FromHeader] int skip = 0, [FromHeader] int take = 10)
     {
         var actors = _actorService.GetActorsSummary(provider, rankStart, rankEnd, skip, take);
@@ -25,6 +25,8 @@ public class ActorsController : ControllerBase
 
     [HttpGet("{actorId}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ActorResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Error))]
+
     public IActionResult GetActorDetails(string actorId)
     {
         var actor = _actorService.GetActorDetails(actorId);
@@ -34,15 +36,18 @@ public class ActorsController : ControllerBase
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ActorResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Error))]
+    [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(Error))] 
     public IActionResult AddActor([FromBody] ActorRequest addRequest)
     {
         var result = _actorService.AddActor(addRequest);
-        return Ok(result);
+        return CreatedAtAction(nameof(GetActorDetails), new { actorId = result.Id }, result);
     }
 
     [HttpPut("{actorId}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ActorResponse))]
-
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Error))]
+    [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(Error))]
     public IActionResult UpdateActor(string actorId, [FromBody] ActorRequest updateRequest)
     {
         var result = _actorService.UpdateActor(actorId, updateRequest);
@@ -50,10 +55,12 @@ public class ActorsController : ControllerBase
     }
 
     [HttpDelete("{actorId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Error))]
     public IActionResult DeleteActor(string actorId)
     {
-        var result = _actorService.DeleteActor(actorId);
+        _actorService.DeleteActor(actorId);
 
-        return Ok(result);
+        return NoContent();
     }
 }

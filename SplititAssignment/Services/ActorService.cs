@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using SplititAssignment.Data;
 using SplititAssignment.Exceptions;
 using SplititAssignment.Interfaces;
 using SplititAssignment.Models;
@@ -19,31 +18,34 @@ namespace SplititAssignment.Services
 
         public ActorResponse AddActor(ActorRequest request)
         {
-            if (_actorRepository.RankExists(request.Rank, request.Source))
+            var currentRankId = _actorRepository.GetRankId(request.Rank, request.Source);
+
+            if (!string.IsNullOrEmpty(currentRankId))
             {
-                throw new DuplicateRankException(request.Name);
+                throw new DuplicateEntityException("Rank", request.Rank.ToString(), request.Source);
+            }
+
+            if (_actorRepository.NameExists(request.Name, request.Source))
+            {
+                throw new DuplicateEntityException("Name", request.Name, request.Source);
             }
 
             var actor = _mapper.Map<Actor>(request);
-            if (!_actorRepository.AddActor(actor))
-            {
-                throw new();
-            }
 
             var response = _mapper.Map<ActorResponse>(actor);
             return response;
         }
 
-        public bool DeleteActor(string actorId)
+        public void DeleteActor(string actorId)
         {
             var toRemove = _actorRepository.GetActor(actorId);
 
             if (toRemove == null)
             {
-                throw new ValidationException();
+                throw new ValidationException("No matching ID found for removal.");
             }
 
-            return _actorRepository.DeleteActor(toRemove);
+            _actorRepository.DeleteActor(toRemove);
         }
 
         public ActorResponse GetActorDetails(string actorId)
@@ -52,17 +54,17 @@ namespace SplititAssignment.Services
 
             if (actor == null)
             {
-                throw new ValidationException();
+                throw new ValidationException("No matching ID found.");
             }
 
             return _mapper.Map<ActorResponse>(actor);
         }
 
-        public IEnumerable<ActorSummary> GetActorsSummary(string provider, int? rankStart = null, int? rankEnd = null, int skip = 0, int take = 10)
+        public ActorsSummaryResponse GetActorsSummary(string provider, int? rankStart = null, int? rankEnd = null, int skip = 0, int take = 10)
         {
             var actors = _actorRepository.GetActors(provider, rankStart, rankEnd, skip, take);
 
-            return _mapper.Map<IEnumerable<ActorSummary>>(actors);
+            return new ActorsSummaryResponse { Actors = _mapper.Map<IEnumerable<ActorSummary>>(actors) };
         }
 
         public ActorResponse UpdateActor(string actorId, ActorRequest request)
@@ -71,12 +73,14 @@ namespace SplititAssignment.Services
 
             if (existingActor == null)
             {
-                throw new ValidationException();
+                throw new ValidationException("No matching ID found for update.");
             }
 
-            if (_actorRepository.RankExists(request.Rank, request.Source))
+            var currentRankId = _actorRepository.GetRankId(request.Rank, request.Source);
+
+            if (!string.IsNullOrEmpty(currentRankId) && currentRankId != actorId)
             {
-                throw new DuplicateRankException(request.Name);
+                throw new DuplicateEntityException("Rank" ,request.Rank.ToString(), request.Source);
             }
 
             var actor = _mapper.Map<Actor>(request);

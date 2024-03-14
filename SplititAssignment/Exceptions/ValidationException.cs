@@ -2,7 +2,7 @@
 {
     public class ValidationException : CustomException
     {
-        public ValidationException() : base("InvalidInput", "Invalid input")
+        public ValidationException(string name) : base(name, "Invalid input")
         {
         }
     }
